@@ -1,0 +1,58 @@
+# When a PR is merged, or when run manually, this workflow will create a
+# release and publish the container image to the GitHub Container Registry. Both
+# will be labeled with the version specified in the manifest file.
+name: Continuous Delivery
+
+on:
+  workflow_dispatch:
+
+env:
+  CONTAINER_REGISTRY: ghcr.io
+  CONTAINER_REGISTRY_USERNAME: ${{ github.actor  }}
+  CONTAINER_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+  MANIFEST_PATH: .version
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    name: Publish Container Image
+    runs-on: ubuntu-latest
+
+    needs: release
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # Get metadata to apply to image
+      - name: Extract Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}
+          tags: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:1.0
+
+      # Authenticate to the container registry
+      - name: Authenticate to Container Registry
+        id: login
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.CONTAINER_REGISTRY }}
+          username: ${{ env.CONTAINER_REGISTRY_USERNAME }}
+          password: ${{ env.CONTAINER_REGISTRY_PASSWORD }}
+
+      # Publish the container image
+      - name: Publish Container Image
+        id: publish
+        uses: docker/build-push-action@v5
+        env:
+          TAGS: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:1.0
+        with:
+          push: true
+          tags: ${{ env.TAGS }}

@@ -1,0 +1,24 @@
+name: Example Workflow
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  test:
+    name: Test the Action
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run the Container Action
+        id: run
+        uses: donaldgifford/docker-action-test@main
+        with:
+          who-to-greet: Mona Lisa Octocat
+
+      - name: Print Output
+        id: output
+        run: echo "${{ steps.run.outputs.greeting }}"
