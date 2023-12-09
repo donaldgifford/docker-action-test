@@ -35,7 +35,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}
-          tags: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:1.0
+          tags: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:latest
 
       # Authenticate to the container registry
       - name: Authenticate to Container Registry
@@ -51,7 +51,7 @@ jobs:
         id: publish
         uses: docker/build-push-action@v5
         env:
-          TAGS: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:1.0
+          TAGS: ${{ env.CONTAINER_REGISTRY }}/${{ github.repository }}:latest
         with:
           push: true
           tags: ${{ env.TAGS }}
